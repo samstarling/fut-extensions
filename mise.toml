@@ -1,0 +1,40 @@
+[tools]
+go = "1.27.1"
+golangci-lint = "2.14.0"
+shellcheck = "0.11.0"
+
+[tasks.build]
+description = "Build each extension's binary for Apple silicon Macs"
+env = { CGO_ENABLED = "0", GOOS = "darwin", GOARCH = "arm64" }
+# Builds everything into a scratch directory first, so a failed build leaves
+# the previous binaries in place for checkouts that fut loads directly.
+run = '''
+set -eu
+binaries="github/bin/publish linear/bin/publish claude/bin/statusline"
+scratch=$(mktemp -d .build.XXXXXX)
+trap 'rm -rf "$scratch"' EXIT
+for binary in $binaries; do
+  go build -trimpath -ldflags='-s -w' -o "$scratch/$binary" "./${binary%%/*}"
+done
+for binary in $binaries; do
+  mkdir -p "$(dirname "$binary")"
+  mv -f "$scratch/$binary" "$binary"
+  echo "built $binary"
+done
+'''
+
+[tasks.lint]
+description = "Lint Go with golangci-lint and shell scripts with shellcheck"
+run = [
+  "golangci-lint run",
+  "golangci-lint fmt --diff",
+  "shellcheck */bin/open launchd/install launchd/uninstall",
+]
+
+[tasks.format]
+description = "Format Go with golangci-lint's formatters"
+run = "golangci-lint fmt"
+
+[tasks.test]
+description = "Run the Go tests"
+run = "go test ./..."

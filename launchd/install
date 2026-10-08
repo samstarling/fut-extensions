@@ -1,0 +1,41 @@
+#!/bin/sh
+# Usage: launchd/install EXTENSION...  (e.g. launchd/install github linear)
+#
+# Runs each extension's bin/publish every 60 seconds. The package is found
+# through the fut daemon, so this works for both local and managed installs.
+# The job's PATH is this shell's PATH, so gh and fut resolve the same way;
+# set FUT_EXTENSIONS_PATH to use something stabler, such as version manager shims.
+# Set FUT_EXTENSIONS_LABEL_PREFIX to change the launchd label prefix.
+set -eu
+prefix=${FUT_EXTENSIONS_LABEL_PREFIX:-local.fut-extensions}
+path=${FUT_EXTENSIONS_PATH:-$PATH}
+mkdir -p "$HOME/Library/LaunchAgents" "$HOME/Library/Logs/fut-extensions"
+for extension in "$@"; do
+  root=$(fut extension show "$extension" --json \
+    | plutil -extract result.extension.root raw -o - -) || {
+    echo "fut has no active extension \"$extension\"; add it and start fut first" >&2
+    exit 1
+  }
+  label="$prefix.$extension"
+  plist="$HOME/Library/LaunchAgents/$label.plist"
+  cat > "$plist" <<PLIST
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>$label</string>
+  <key>ProgramArguments</key><array><string>$root/bin/publish</string></array>
+  <key>StartInterval</key><integer>60</integer>
+  <key>RunAtLoad</key><true/>
+  <key>EnvironmentVariables</key><dict>
+    <key>PATH</key><string>$path</string>
+    <key>FUT_EXTENSION_ID</key><string>$extension</string>
+  </dict>
+  <key>StandardErrorPath</key><string>$HOME/Library/Logs/fut-extensions/$extension.log</string>
+</dict>
+</plist>
+PLIST
+  launchctl bootout "gui/$(id -u)/$label" 2>/dev/null || true
+  launchctl bootstrap "gui/$(id -u)" "$plist"
+  echo "loaded $label -> $root"
+done

@@ -1,0 +1,44 @@
+# fut's install-git doesn't build anything, so each release is a commit that
+# contains the built binaries. Pushing a tag such as v0.3.0 builds
+# that commit, tags it v0.3.0-build so it stays fetchable, and moves the
+# `release` branch to it.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: jdx/mise-action@v3
+      - run: mise run lint
+      - run: mise run test
+      - run: mise run build
+      - name: Commit the built packages
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898299+github-actions[bot]@users.noreply.github.com"
+          git add -f -- */bin
+          git commit -m "Build $TAG"
+          git tag "$TAG-build"
+          git push origin "$TAG-build"
+          git push --force origin HEAD:refs/heads/release
+          sha=$(git rev-parse HEAD)
+          {
+            echo "## Install $TAG"
+            echo
+            echo '```sh'
+            for manifest in */fut-extension.toml; do
+              ext=${manifest%%/*}
+              echo "fut extension install-git $GITHUB_SERVER_URL/$GITHUB_REPOSITORY --rev $sha --path $ext"
+            done
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,11 @@
+#!/bin/sh
+url_file="$HOME/Library/Caches/fut-extensions/${FUT_EXTENSION_ID:-linear}/$FUT_WORKSPACE_ID"
+if [ ! -f "$url_file" ]; then
+  echo "no Linear issue for this workspace's branch" >&2
+  exit 1
+fi
+url=$(cat "$url_file")
+if [ -d /Applications/Linear.app ]; then
+  url=$(printf '%s' "$url" | sed 's|^https://linear.app/|linear://|')
+fi
+exec open "$url"

@@ -1,0 +1,7 @@
+# Built by `mise run build`; release commits add them with `git add -f`.
+/github/bin/publish
+/linear/bin/publish
+/claude/bin/statusline
+
+# `mise run build` scratch directories.
+/.build.*

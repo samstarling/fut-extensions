@@ -1,0 +1,18 @@
+api_version = 1
+version = "0.1.0"
+fut = ">=0.34.0, <1.0.0"
+capabilities = ["presentation_tokens"]
+id = "claude"
+
+# Published by bin/statusline, which Claude Code runs as its status line.
+[[presentation_tokens]]
+name = "model"
+scope = "pane"
+
+[[presentation_tokens]]
+name = "effort"
+scope = "pane"
+
+[[presentation_tokens]]
+name = "context"
+scope = "pane"

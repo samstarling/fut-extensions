@@ -1,0 +1,68 @@
+api_version = 1
+version = "0.3.0"
+fut = ">=0.34.0, <1.0.0"
+capabilities = ["commands", "hooks", "presentation_tokens"]
+id = "github"
+
+# Publishes a new workspace straight away; fut has no timer or branch-change hook, so launchd/install polls for the rest.
+[hooks]
+"workspace.created" = ["./bin/publish"]
+
+[commands.open]
+title = "Open pull request"
+argv = ["./bin/open"]
+mode = "background"
+
+[commands.refresh]
+title = "Refresh pull request status"
+argv = ["./bin/publish"]
+mode = "background"
+
+[[presentation_tokens]]
+name = "pr"
+scope = "workspace"
+
+[[presentation_tokens]]
+name = "state"
+scope = "workspace"
+
+[presentation_tokens.variants.draft]
+text = "draft"
+style = "muted"
+
+[presentation_tokens.variants.open]
+text = "open"
+style = "muted"
+
+[presentation_tokens.variants.approved]
+text = "approved"
+style = "added"
+
+[presentation_tokens.variants.changes_requested]
+text = "changes requested"
+style = "attention"
+
+[presentation_tokens.variants.merged]
+text = "merged"
+style = "muted"
+
+[presentation_tokens.variants.closed]
+text = "closed"
+style = "deleted"
+
+[[presentation_tokens]]
+name = "checks"
+scope = "workspace"
+
+[presentation_tokens.variants.passing]
+text = "✓"
+style = "added"
+
+[presentation_tokens.variants.failing]
+text = "✗"
+style = "error"
+
+[presentation_tokens.variants.pending]
+text = "●"
+style = "attention"
+presentation = "pulse"

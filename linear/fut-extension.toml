@@ -1,0 +1,55 @@
+api_version = 1
+version = "0.3.0"
+fut = ">=0.34.0, <1.0.0"
+capabilities = ["commands", "hooks", "presentation_tokens"]
+id = "linear"
+
+# Publishes a new workspace straight away; fut has no timer or branch-change hook, so launchd/install polls for the rest.
+[hooks]
+"workspace.created" = ["./bin/publish"]
+
+[commands.open]
+title = "Open Linear issue"
+argv = ["./bin/open"]
+mode = "background"
+
+[commands.refresh]
+title = "Refresh Linear issue status"
+argv = ["./bin/publish"]
+mode = "background"
+
+[[presentation_tokens]]
+name = "issue"
+scope = "workspace"
+
+[[presentation_tokens]]
+name = "status"
+scope = "workspace"
+
+[[presentation_tokens]]
+name = "status_icon"
+scope = "workspace"
+
+[presentation_tokens.variants.triage]
+text = "◇"
+style = "attention"
+
+[presentation_tokens.variants.backlog]
+text = "○"
+style = "muted"
+
+[presentation_tokens.variants.unstarted]
+text = "○"
+style = "normal"
+
+[presentation_tokens.variants.started]
+text = "◐"
+style = "activity"
+
+[presentation_tokens.variants.completed]
+text = "●"
+style = "added"
+
+[presentation_tokens.variants.canceled]
+text = "⊘"
+style = "muted"

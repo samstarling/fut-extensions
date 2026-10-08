@@ -1,0 +1,10 @@
+#!/bin/sh
+# Usage: launchd/uninstall EXTENSION...
+set -eu
+prefix=${FUT_EXTENSIONS_LABEL_PREFIX:-local.fut-extensions}
+for extension in "$@"; do
+  label="$prefix.$extension"
+  launchctl bootout "gui/$(id -u)/$label" 2>/dev/null || true
+  rm -f "$HOME/Library/LaunchAgents/$label.plist"
+  echo "removed $label"
+done

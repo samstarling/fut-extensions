@@ -10,11 +10,11 @@ env = { CGO_ENABLED = "0", GOOS = "darwin", GOARCH = "arm64" }
 # the previous binaries in place for checkouts that fut loads directly.
 run = '''
 set -eu
-binaries="github/bin/publish linear/bin/publish claude/bin/statusline"
+binaries="extensions/github/bin/publish extensions/linear/bin/publish extensions/claude/bin/statusline"
 scratch=$(mktemp -d .build.XXXXXX)
 trap 'rm -rf "$scratch"' EXIT
 for binary in $binaries; do
-  go build -trimpath -ldflags='-s -w' -o "$scratch/$binary" "./${binary%%/*}"
+  go build -trimpath -ldflags='-s -w' -o "$scratch/$binary" "./${binary%/bin/*}"
 done
 for binary in $binaries; do
   mkdir -p "$(dirname "$binary")"
@@ -28,7 +28,7 @@ description = "Lint Go with golangci-lint and shell scripts with shellcheck"
 run = [
   "golangci-lint run",
   "golangci-lint fmt --diff",
-  "shellcheck */bin/open launchd/install launchd/uninstall",
+  "shellcheck extensions/*/bin/open launchd/install launchd/uninstall",
 ]
 
 [tasks.format]

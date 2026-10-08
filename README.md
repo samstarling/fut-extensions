@@ -1,7 +1,8 @@
 # fut-extensions
 
 [fut](https://fut.sh) extensions that show each workspace branch's GitHub pull
-request and Linear issue. Each directory is a standalone extension package.
+request and Linear issue. Each directory under `extensions/` is a standalone
+extension package.
 
 - `github` publishes `pr`, `state` and `checks`. Needs an authenticated `gh`.
 - `linear` publishes `issue`, `status` and `status_icon`. Reads a personal API
@@ -19,7 +20,7 @@ contains the built binaries, is on the `release` branch and tagged
 `vX.Y.Z-build`; the release workflow's summary lists the exact commands.
 
 ```sh
-fut extension install-git https://github.com/samstarling/fut-extensions --rev <commit> --path github
+fut extension install-git https://github.com/samstarling/fut-extensions --rev <commit> --path extensions/github
 fut extension enable github
 fut extension reload
 ```
@@ -29,8 +30,8 @@ place from `~/.config/fut/config.toml`:
 
 ```toml
 extensions = [
-  "/path/to/fut-extensions/github",
-  "/path/to/fut-extensions/linear",
+  "/path/to/fut-extensions/extensions/github",
+  "/path/to/fut-extensions/extensions/linear",
 ]
 ```
 
@@ -98,7 +99,7 @@ golangci-lint and shellcheck, then:
 - `mise run lint` checks Go with golangci-lint and shell scripts with shellcheck
 - `mise run format` formats Go
 
-Check a built package with `fut extension validate github`.
+Check a built package with `fut extension validate extensions/github`.
 
 ## Releasing
 
